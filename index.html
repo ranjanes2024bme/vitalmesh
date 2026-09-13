@@ -5,76 +5,163 @@
   <title>VitalMesh</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    body { font-family: sans-serif; background: #0f172a; color: white; text-align: center; padding: 40px; }
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background: #0a0612;
+      color: white;
+      text-align: center;
+      padding: 40px 20px;
+      overflow-x: hidden;
+      position: relative;
+      min-height: 100vh;
+    }
+
+    .wave-bg {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      z-index: -1;
+      background: radial-gradient(circle at 20% 30%, rgba(59,130,246,0.10), transparent 60%),
+                  radial-gradient(circle at 80% 70%, rgba(236,72,153,0.09), transparent 60%),
+                  radial-gradient(circle at 50% 90%, rgba(139,92,246,0.08), transparent 60%);
+      background-size: 200% 200%;
+      animation: drift 18s ease-in-out infinite;
+    }
+    @keyframes drift {
+      0%   { background-position: 0% 0%, 100% 100%, 50% 100%; }
+      50%  { background-position: 40% 60%, 60% 30%, 70% 40%; }
+      100% { background-position: 0% 0%, 100% 100%, 50% 100%; }
+    }
+
     #vitals { font-size: 22px; margin-top: 20px; }
-    #status-label { font-size: 20px; font-weight: bold; margin-top: 8px; letter-spacing: 1px; }
+    #status-label { font-size: 20px; font-weight: bold; margin-top: 8px; letter-spacing: 2px; }
+
+    .figure-wrap { position: relative; width: 160px; height: 220px; margin: 30px auto; }
+
+    #aura {
+      position: absolute;
+      top: 45%; left: 50%;
+      width: 220px; height: 220px;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      background: radial-gradient(circle, #fff4d6 0%, var(--glow) 45%, transparent 75%);
+      filter: blur(30px);
+      opacity: 0.6;
+      transition: --glow 2s;
+      animation: auraPulse 2.4s ease-in-out infinite;
+      z-index: 0;
+    }
+    @keyframes auraPulse {
+      0%, 100% { transform: translate(-50%, -50%) scale(1);    opacity: 0.5; }
+      50%      { transform: translate(-50%, -50%) scale(1.12); opacity: 0.8; }
+    }
+
+    .sparkle {
+      position: absolute;
+      width: 3px; height: 3px;
+      background: white;
+      border-radius: 50%;
+      opacity: 0;
+      animation: twinkle 3s ease-in-out infinite;
+    }
+    @keyframes twinkle {
+      0%, 100% { opacity: 0; transform: scale(0.5); }
+      50%      { opacity: 1; transform: scale(1.4); }
+    }
 
     #dot {
+      position: relative;
+      z-index: 1;
       width: 100px;
-      margin: 20px auto;
       display: block;
-      color: #3b82f6;
-      transition: color 1.5s ease-in-out, filter 1.5s ease-in-out;
-      animation: pulse 1s infinite ease-in-out;
+      margin: 40px auto 0;
+      animation: pulse 2.2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50%      { transform: scale(1.06); }
     }
 
     #body-male, #body-female { display: none; }
 
-    @keyframes pulse {
-      0%   { transform: scale(1);    filter: drop-shadow(0 0 8px currentColor) drop-shadow(0 0 22px currentColor); }
-      50%  { transform: scale(1.08); filter: drop-shadow(0 0 14px currentColor) drop-shadow(0 0 34px currentColor); }
-      100% { transform: scale(1);    filter: drop-shadow(0 0 8px currentColor) drop-shadow(0 0 22px currentColor); }
+    .ranges {
+      margin: 40px auto 0;
+      max-width: 340px;
+      font-size: 14px;
+      color: #94a3b8;
+      border-top: 1px solid #241a33;
+      padding-top: 16px;
+      line-height: 1.8;
     }
+    .ranges b { color: #cbd5e1; }
   </style>
 </head>
 <body>
+  <div class="wave-bg"></div>
+
   <h1>VitalMesh</h1>
 
-  <svg id="dot" width="100" height="170" viewBox="0 0 100 170" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="50" cy="25" r="20" fill="currentColor" />
-    <ellipse cx="43" cy="18" rx="6" ry="4" fill="white" opacity="0.35" />
+  <div class="figure-wrap" id="figureWrap">
+    <div id="aura"></div>
 
-    <g id="body-male">
-      <rect x="35" y="48" width="30" height="55" rx="12" fill="currentColor" />
-      <rect x="14" y="52" width="14" height="48" rx="7" fill="currentColor" />
-      <rect x="72" y="52" width="14" height="48" rx="7" fill="currentColor" />
-      <rect x="30" y="103" width="14" height="55" rx="7" fill="currentColor" />
-      <rect x="56" y="103" width="14" height="55" rx="7" fill="currentColor" />
-    </g>
+    <svg id="dot" viewBox="0 0 100 170" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="gemGradient" cx="50%" cy="30%" r="75%">
+          <stop offset="0%" stop-color="#fff7e0" />
+          <stop offset="35%" id="gemMid" stop-color="#f5a3d0" />
+          <stop offset="100%" id="gemEdge" stop-color="#3b82f6" />
+        </radialGradient>
+      </defs>
 
-    <g id="body-female">
-      <rect x="38" y="48" width="24" height="30" rx="10" fill="currentColor" />
-      <rect x="14" y="52" width="14" height="40" rx="7" fill="currentColor" />
-      <rect x="72" y="52" width="14" height="40" rx="7" fill="currentColor" />
-      <polygon points="30,78 70,78 62,120 38,120" fill="currentColor" />
-      <rect x="30" y="120" width="14" height="45" rx="7" fill="currentColor" />
-      <rect x="56" y="120" width="14" height="45" rx="7" fill="currentColor" />
-    </g>
-  </svg>
+      <circle cx="50" cy="25" r="20" fill="url(#gemGradient)" />
+      <line x1="42" y1="10" x2="42" y2="40" stroke="white" stroke-width="1.5" opacity="0.35" />
 
-  <div id="status-label">VERY GOOD</div>
+      <g id="body-male">
+        <rect x="35" y="48" width="30" height="55" rx="12" fill="url(#gemGradient)" />
+        <rect x="14" y="52" width="14" height="48" rx="7" fill="url(#gemGradient)" />
+        <rect x="72" y="52" width="14" height="48" rx="7" fill="url(#gemGradient)" />
+        <rect x="30" y="103" width="14" height="55" rx="7" fill="url(#gemGradient)" />
+        <rect x="56" y="103" width="14" height="55" rx="7" fill="url(#gemGradient)" />
+        <line x1="42" y1="52" x2="42" y2="95" stroke="white" stroke-width="1.5" opacity="0.3" />
+      </g>
+
+      <g id="body-female">
+        <rect x="38" y="48" width="24" height="30" rx="10" fill="url(#gemGradient)" />
+        <rect x="14" y="52" width="14" height="40" rx="7" fill="url(#gemGradient)" />
+        <rect x="72" y="52" width="14" height="40" rx="7" fill="url(#gemGradient)" />
+        <polygon points="30,78 70,78 62,120 38,120" fill="url(#gemGradient)" />
+        <rect x="30" y="120" width="14" height="45" rx="7" fill="url(#gemGradient)" />
+        <rect x="56" y="120" width="14" height="45" rx="7" fill="url(#gemGradient)" />
+        <line x1="42" y1="52" x2="42" y2="110" stroke="white" stroke-width="1.5" opacity="0.3" />
+      </g>
+    </svg>
+  </div>
+
+  <div id="status-label">NORMAL</div>
   <div id="vitals">Waiting for data...</div>
+
+  <div class="ranges">
+    <div><b>Normal ranges</b></div>
+    <div>Heart rate: 60–100 bpm</div>
+    <div>SpO2: 95–100%</div>
+    <div>Temperature: 36.1–37.2°C</div>
+  </div>
 
   <script>
     const supabaseUrl = "https://nfrjpccjbjskmvuglhnt.supabase.co";
     const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5mcmpwY2NqYmpza212dWdsaG50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyOTA1MTEsImV4cCI6MjEwNDg2NjUxMX0.--QAVv1DIG6GRHo4ayydgfQ31TnWTqBsQwdhqNWxm5M";
     const client = supabase.createClient(supabaseUrl, supabaseKey);
 
-    // The 6 gem-tone stops, in order from best (0) to worst (100)
-    const gradientStops = [
-      { score: 0,   rgb: [59, 130, 246],  label: "VERY GOOD" }, // blue
-      { score: 20,  rgb: [30, 58, 138],   label: "BETTER" },    // dark blue
-      { score: 40,  rgb: [139, 92, 246],  label: "GOOD" },      // purple
-      { score: 60,  rgb: [236, 72, 153],  label: "AVERAGE" },   // pink
-      { score: 80,  rgb: [245, 158, 11],  label: "BAD" },       // amber
-      { score: 100, rgb: [239, 68, 68],   label: "WORSE" }      // red
+    const stops = [
+      { score: 0,   rgb: [59, 130, 246],  label: "NORMAL" },
+      { score: 50,  rgb: [236, 72, 153],  label: "CAUTION" },
+      { score: 100, rgb: [239, 68, 68],   label: "ABNORMAL" }
     ];
 
-    // Smoothly blend between two neighboring gem colors based on exact score
     function scoreToColor(score) {
       score = Math.max(0, Math.min(100, score));
-      for (let i = 0; i < gradientStops.length - 1; i++) {
-        const a = gradientStops[i], b = gradientStops[i + 1];
+      for (let i = 0; i < stops.length - 1; i++) {
+        const a = stops[i], b = stops[i + 1];
         if (score >= a.score && score <= b.score) {
           const t = (score - a.score) / (b.score - a.score);
           const rgb = a.rgb.map((c, idx) => Math.round(c + t * (b.rgb[idx] - c)));
@@ -82,20 +169,29 @@
           return { css: `rgb(${rgb[0]},${rgb[1]},${rgb[2]})`, label };
         }
       }
-      return { css: `rgb(${gradientStops.at(-1).rgb.join(",")})`, label: gradientStops.at(-1).label };
+      return { css: `rgb(${stops.at(-1).rgb.join(",")})`, label: stops.at(-1).label };
     }
 
-    // Combine hr, spo2, temp deviation from normal into one 0-100 score
     function computeScore(r) {
-  const hrDev = Math.abs((r.hr ?? 72) - 72) / 12;
-  const spo2Dev = Math.abs((r.spo2 ?? 97) - 97) / 3;
-  const tempDev = Math.abs((r.temp ?? 36.8) - 36.8) / 0.6;
+      const hrDev = Math.abs((r.hr ?? 72) - 72) / 12;
+      const spo2Dev = Math.abs((r.spo2 ?? 97) - 97) / 3;
+      const tempDev = Math.abs((r.temp ?? 36.8) - 36.8) / 0.6;
+      const worstDev = Math.max(hrDev, spo2Dev, tempDev);
+      return Math.min(Math.round((worstDev / 3) * 100), 100);
+    }
 
-  // Take whichever vital is MOST abnormal - one severely bad reading
-  // should be enough to raise concern, not get diluted by the others
-  const worstDev = Math.max(hrDev, spo2Dev, tempDev);
-  return Math.min(Math.round((worstDev / 3) * 100), 100);
-}
+    // Scatter sparkle particles once, around the figure
+    function createSparkles() {
+      const wrap = document.getElementById("figureWrap");
+      for (let i = 0; i < 14; i++) {
+        const s = document.createElement("div");
+        s.className = "sparkle";
+        s.style.left = Math.random() * 100 + "%";
+        s.style.top = Math.random() * 100 + "%";
+        s.style.animationDelay = (Math.random() * 3) + "s";
+        s.style.animationDuration = (2 + Math.random() * 2) + "s";
+        wrap.appendChild(s);
+      }
     }
 
     async function loadLatest() {
@@ -110,31 +206,29 @@
         document.getElementById("vitals").innerText =
           `HR: ${r.hr} bpm | SpO2: ${r.spo2}% | Temp: ${r.temp}°C`;
 
-        const dot = document.getElementById("dot");
         const bodyMale = document.getElementById("body-male");
         const bodyFemale = document.getElementById("body-female");
-
         if (r.gender === "female") {
-          bodyFemale.style.display = "inline";
-          bodyMale.style.display = "none";
+          bodyFemale.style.display = "inline"; bodyMale.style.display = "none";
         } else {
-          bodyMale.style.display = "inline";
-          bodyFemale.style.display = "none";
+          bodyMale.style.display = "inline"; bodyFemale.style.display = "none";
         }
 
         const score = computeScore(r);
         const { css, label } = scoreToColor(score);
-        dot.style.color = css;
+
+        document.getElementById("gemEdge").setAttribute("stop-color", css);
+        document.getElementById("aura").style.setProperty("--glow", css);
+        document.getElementById("aura").style.background =
+          `radial-gradient(circle, #fff4d6 0%, ${css} 45%, transparent 75%)`;
 
         const labelEl = document.getElementById("status-label");
         labelEl.innerText = label;
         labelEl.style.color = css;
-
-        const beatSeconds = r.hr ? (60 / r.hr) : 1;
-        dot.style.animationDuration = beatSeconds + "s";
       }
     }
 
+    createSparkles();
     loadLatest();
     setInterval(loadLatest, 3000);
   </script>
