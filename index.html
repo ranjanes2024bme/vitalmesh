@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>VitalMesh</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body { font-family: sans-serif; background: #0f172a; color: white; text-align: center; padding: 40px; }
+    #vitals { font-size: 24px; margin-top: 20px; }
+    #dot { width: 100px; height: 100px; border-radius: 50%; margin: 20px auto; background: #22d3ee; transition: background 0.5s; }
+  </style>
+</head>
+<body>
+  <h1>VitalMesh</h1>
+  <div id="dot"></div>
+  <div id="vitals">Waiting for data...</div>
+
+  <script>
+    const supabaseUrl = "https://nfrjpccjbjskmvuglhnt.supabase.co;
+    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5mcmpwY2NqYmpza212dWdsaG50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyOTA1MTEsImV4cCI6MjEwNDg2NjUxMX0.--QAVv1DIG6GRHo4ayydgfQ31TnWTqBsQwdhqNWxm5M";
+    const client = supabase.createClient(supabaseUrl, supabaseKey);
+
+    async function loadLatest() {
+      const { data, error } = await client
+        .from("readings")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(1);
+
+      if (data && data.length > 0) {
+        const r = data[0];
+        document.getElementById("vitals").innerText =
+          `HR: ${r.hr} bpm | SpO2: ${r.spo2}% | Temp: ${r.temp}°C`;
+
+        const dot = document.getElementById("dot");
+        dot.style.background = (r.hr > 100 || r.spo2 < 92) ? "#ef4444" : "#22d3ee";
+      }
+    }
+
+    loadLatest();
+    setInterval(loadLatest, 3000);
+  </script>
+</body>
+</html>
