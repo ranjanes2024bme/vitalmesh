@@ -41,17 +41,17 @@
     #aura {
       position: absolute;
       top: 45%; left: 50%;
-      width: 240px; height: 240px;
+      width: 220px; height: 220px;
       transform: translate(-50%, -50%);
       border-radius: 50%;
-      filter: blur(32px);
-      opacity: 0.65;
+      filter: blur(30px);
+      opacity: 0.6;
       animation: auraPulse 2.4s ease-in-out infinite;
       z-index: 0;
     }
     @keyframes auraPulse {
-      0%, 100% { transform: translate(-50%, -50%) scale(1);    opacity: 0.55; }
-      50%      { transform: translate(-50%, -50%) scale(1.14); opacity: 0.85; }
+      0%, 100% { transform: translate(-50%, -50%) scale(1);    opacity: 0.5; }
+      50%      { transform: translate(-50%, -50%) scale(1.14); opacity: 0.8; }
     }
 
     .sparkle {
@@ -74,7 +74,7 @@
       display: block;
       margin: 45px auto 0;
       animation: pulse 2.2s ease-in-out infinite;
-      filter: drop-shadow(0 0 10px rgba(255,255,255,0.25));
+      filter: drop-shadow(0 0 8px rgba(255,255,255,0.3));
     }
     @keyframes pulse {
       0%, 100% { transform: scale(1); }
@@ -105,45 +105,33 @@
 
     <svg id="dot" viewBox="0 0 100 190" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <radialGradient id="gemGradient" cx="50%" cy="25%" r="80%">
+        <linearGradient id="stickGradient" x1="0%" y1="0%" x2="0%" y2="100%">
           <stop offset="0%" stop-color="#fffdf2" />
-          <stop offset="30%" id="gemMid" stop-color="#4ade80" />
+          <stop offset="40%" id="gemMid" stop-color="#4ade80" />
           <stop offset="100%" id="gemEdge" stop-color="#166534" />
-        </radialGradient>
+        </linearGradient>
       </defs>
 
       <!-- Head -->
-      <circle cx="50" cy="22" r="17" fill="url(#gemGradient)" stroke="white" stroke-opacity="0.25" stroke-width="1" />
-      <ellipse cx="44" cy="16" rx="5" ry="3.5" fill="white" opacity="0.35" />
+      <circle cx="50" cy="22" r="14" fill="none" stroke="url(#stickGradient)" stroke-width="4" />
 
-      <!-- Male body: tapered organic torso -->
-      <g id="body-male">
-        <path d="M38,42 C34,55 34,70 38,82 L62,82 C66,70 66,55 62,42 C58,38 42,38 38,42 Z"
-              fill="url(#gemGradient)" stroke="white" stroke-opacity="0.2" stroke-width="1" />
-        <path d="M35,46 C24,50 18,62 20,78 C21,82 27,82 27,77 C26,66 29,56 35,50 Z"
-              fill="url(#gemGradient)" opacity="0.95" />
-        <path d="M65,46 C76,50 82,62 80,78 C79,82 73,82 73,77 C74,66 71,56 65,50 Z"
-              fill="url(#gemGradient)" opacity="0.95" />
-        <path d="M40,82 C36,100 36,120 40,138 C44,140 48,140 48,138 C46,120 46,100 46,84 Z"
-              fill="url(#gemGradient)" opacity="0.95" />
-        <path d="M60,82 C64,100 64,120 60,138 C56,140 52,140 52,138 C54,120 54,100 54,84 Z"
-              fill="url(#gemGradient)" opacity="0.95" />
+      <!-- Body: straight stick lines -->
+      <g id="body-male" stroke="url(#stickGradient)" stroke-width="4" stroke-linecap="round" fill="none">
+        <line x1="50" y1="36" x2="50" y2="100" />              <!-- spine -->
+        <line x1="50" y1="50" x2="22" y2="75" />                <!-- left arm -->
+        <line x1="50" y1="50" x2="78" y2="75" />                <!-- right arm -->
+        <line x1="50" y1="100" x2="28" y2="150" />              <!-- left leg -->
+        <line x1="50" y1="100" x2="72" y2="150" />              <!-- right leg -->
       </g>
 
-      <!-- Female body: tapered torso + flowing skirt -->
-      <g id="body-female">
-        <path d="M40,42 C37,52 37,62 40,70 L60,70 C63,62 63,52 60,42 C56,38 44,38 40,42 Z"
-              fill="url(#gemGradient)" stroke="white" stroke-opacity="0.2" stroke-width="1" />
-        <path d="M37,46 C28,50 23,60 25,74 C26,78 31,78 31,74 C30,64 32,56 37,50 Z"
-              fill="url(#gemGradient)" opacity="0.95" />
-        <path d="M63,46 C72,50 77,60 75,74 C74,78 69,78 69,74 C70,64 68,56 63,50 Z"
-              fill="url(#gemGradient)" opacity="0.95" />
-        <path d="M32,70 L68,70 C72,86 66,100 58,102 L42,102 C34,100 28,86 32,70 Z"
-              fill="url(#gemGradient)" opacity="0.95" />
-        <path d="M42,102 C38,116 38,128 41,138 C44,140 47,140 47,138 C46,128 46,116 47,104 Z"
-              fill="url(#gemGradient)" opacity="0.95" />
-        <path d="M58,102 C62,116 62,128 59,138 C56,140 53,140 53,138 C54,128 54,116 53,104 Z"
-              fill="url(#gemGradient)" opacity="0.95" />
+      <!-- Body: stick lines with a "dress" triangle for female figure -->
+      <g id="body-female" stroke="url(#stickGradient)" stroke-width="4" stroke-linecap="round" fill="none">
+        <line x1="50" y1="36" x2="50" y2="80" />                <!-- spine -->
+        <line x1="50" y1="50" x2="22" y2="75" />                <!-- left arm -->
+        <line x1="50" y1="50" x2="78" y2="75" />                <!-- right arm -->
+        <path d="M38,80 L62,80 L72,115 L28,115 Z" />            <!-- skirt triangle -->
+        <line x1="42" y1="115" x2="32" y2="150" />              <!-- left leg -->
+        <line x1="58" y1="115" x2="68" y2="150" />              <!-- right leg -->
       </g>
     </svg>
   </div>
@@ -163,11 +151,10 @@
     const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5mcmpwY2NqYmpza212dWdsaG50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyOTA1MTEsImV4cCI6MjEwNDg2NjUxMX0.--QAVv1DIG6GRHo4ayydgfQ31TnWTqBsQwdhqNWxm5M";
     const client = supabase.createClient(supabaseUrl, supabaseKey);
 
-    // Green -> Blue -> Red, each with a matching mid-tone for a richer gradient
     const stops = [
-      { score: 0,   edge: [22, 101, 52],  mid: [74, 222, 128],  label: "NORMAL" },   // deep green -> bright green
-      { score: 50,  edge: [30, 58, 138],  mid: [96, 165, 250],  label: "CAUTION" },  // deep blue -> bright blue
-      { score: 100, edge: [153, 27, 27],  mid: [248, 113, 113], label: "ABNORMAL" } // deep red -> bright red
+      { score: 0,   edge: [22, 101, 52],  mid: [74, 222, 128],  label: "NORMAL" },
+      { score: 50,  edge: [30, 58, 138],  mid: [96, 165, 250],  label: "CAUTION" },
+      { score: 100, edge: [153, 27, 27],  mid: [248, 113, 113], label: "ABNORMAL" }
     ];
 
     function blend(a, b, t) {
@@ -183,11 +170,7 @@
           const edge = blend(a.edge, b.edge, t);
           const mid = blend(a.mid, b.mid, t);
           const label = t < 0.5 ? a.label : b.label;
-          return {
-            edgeCss: `rgb(${edge.join(",")})`,
-            midCss: `rgb(${mid.join(",")})`,
-            label
-          };
+          return { edgeCss: `rgb(${edge.join(",")})`, midCss: `rgb(${mid.join(",")})`, label };
         }
       }
       const last = stops.at(-1);
