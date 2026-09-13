@@ -8,7 +8,7 @@
     body {
       margin: 0;
       font-family: sans-serif;
-      background: #0a0612;
+      background: #000000;
       color: white;
       text-align: center;
       padding: 40px 20px;
@@ -21,9 +21,9 @@
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
       z-index: -1;
-      background: radial-gradient(circle at 20% 30%, rgba(59,130,246,0.10), transparent 60%),
-                  radial-gradient(circle at 80% 70%, rgba(236,72,153,0.09), transparent 60%),
-                  radial-gradient(circle at 50% 90%, rgba(139,92,246,0.08), transparent 60%);
+      background: radial-gradient(circle at 20% 30%, rgba(34,197,94,0.10), transparent 60%),
+                  radial-gradient(circle at 80% 70%, rgba(59,130,246,0.09), transparent 60%),
+                  radial-gradient(circle at 50% 90%, rgba(239,68,68,0.07), transparent 60%);
       background-size: 200% 200%;
       animation: drift 18s ease-in-out infinite;
     }
@@ -36,24 +36,22 @@
     #vitals { font-size: 22px; margin-top: 20px; }
     #status-label { font-size: 20px; font-weight: bold; margin-top: 8px; letter-spacing: 2px; }
 
-    .figure-wrap { position: relative; width: 160px; height: 220px; margin: 30px auto; }
+    .figure-wrap { position: relative; width: 170px; height: 230px; margin: 30px auto; }
 
     #aura {
       position: absolute;
       top: 45%; left: 50%;
-      width: 220px; height: 220px;
+      width: 240px; height: 240px;
       transform: translate(-50%, -50%);
       border-radius: 50%;
-      background: radial-gradient(circle, #fff4d6 0%, var(--glow) 45%, transparent 75%);
-      filter: blur(30px);
-      opacity: 0.6;
-      transition: --glow 2s;
+      filter: blur(32px);
+      opacity: 0.65;
       animation: auraPulse 2.4s ease-in-out infinite;
       z-index: 0;
     }
     @keyframes auraPulse {
-      0%, 100% { transform: translate(-50%, -50%) scale(1);    opacity: 0.5; }
-      50%      { transform: translate(-50%, -50%) scale(1.12); opacity: 0.8; }
+      0%, 100% { transform: translate(-50%, -50%) scale(1);    opacity: 0.55; }
+      50%      { transform: translate(-50%, -50%) scale(1.14); opacity: 0.85; }
     }
 
     .sparkle {
@@ -72,14 +70,15 @@
     #dot {
       position: relative;
       z-index: 1;
-      width: 100px;
+      width: 120px;
       display: block;
-      margin: 40px auto 0;
+      margin: 45px auto 0;
       animation: pulse 2.2s ease-in-out infinite;
+      filter: drop-shadow(0 0 10px rgba(255,255,255,0.25));
     }
     @keyframes pulse {
       0%, 100% { transform: scale(1); }
-      50%      { transform: scale(1.06); }
+      50%      { transform: scale(1.05); }
     }
 
     #body-male, #body-female { display: none; }
@@ -89,7 +88,7 @@
       max-width: 340px;
       font-size: 14px;
       color: #94a3b8;
-      border-top: 1px solid #241a33;
+      border-top: 1px solid #1a1a1a;
       padding-top: 16px;
       line-height: 1.8;
     }
@@ -104,35 +103,47 @@
   <div class="figure-wrap" id="figureWrap">
     <div id="aura"></div>
 
-    <svg id="dot" viewBox="0 0 100 170" xmlns="http://www.w3.org/2000/svg">
+    <svg id="dot" viewBox="0 0 100 190" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <radialGradient id="gemGradient" cx="50%" cy="30%" r="75%">
-          <stop offset="0%" stop-color="#fff7e0" />
-          <stop offset="35%" id="gemMid" stop-color="#f5a3d0" />
-          <stop offset="100%" id="gemEdge" stop-color="#3b82f6" />
+        <radialGradient id="gemGradient" cx="50%" cy="25%" r="80%">
+          <stop offset="0%" stop-color="#fffdf2" />
+          <stop offset="30%" id="gemMid" stop-color="#4ade80" />
+          <stop offset="100%" id="gemEdge" stop-color="#166534" />
         </radialGradient>
       </defs>
 
-      <circle cx="50" cy="25" r="20" fill="url(#gemGradient)" />
-      <line x1="42" y1="10" x2="42" y2="40" stroke="white" stroke-width="1.5" opacity="0.35" />
+      <!-- Head -->
+      <circle cx="50" cy="22" r="17" fill="url(#gemGradient)" stroke="white" stroke-opacity="0.25" stroke-width="1" />
+      <ellipse cx="44" cy="16" rx="5" ry="3.5" fill="white" opacity="0.35" />
 
+      <!-- Male body: tapered organic torso -->
       <g id="body-male">
-        <rect x="35" y="48" width="30" height="55" rx="12" fill="url(#gemGradient)" />
-        <rect x="14" y="52" width="14" height="48" rx="7" fill="url(#gemGradient)" />
-        <rect x="72" y="52" width="14" height="48" rx="7" fill="url(#gemGradient)" />
-        <rect x="30" y="103" width="14" height="55" rx="7" fill="url(#gemGradient)" />
-        <rect x="56" y="103" width="14" height="55" rx="7" fill="url(#gemGradient)" />
-        <line x1="42" y1="52" x2="42" y2="95" stroke="white" stroke-width="1.5" opacity="0.3" />
+        <path d="M38,42 C34,55 34,70 38,82 L62,82 C66,70 66,55 62,42 C58,38 42,38 38,42 Z"
+              fill="url(#gemGradient)" stroke="white" stroke-opacity="0.2" stroke-width="1" />
+        <path d="M35,46 C24,50 18,62 20,78 C21,82 27,82 27,77 C26,66 29,56 35,50 Z"
+              fill="url(#gemGradient)" opacity="0.95" />
+        <path d="M65,46 C76,50 82,62 80,78 C79,82 73,82 73,77 C74,66 71,56 65,50 Z"
+              fill="url(#gemGradient)" opacity="0.95" />
+        <path d="M40,82 C36,100 36,120 40,138 C44,140 48,140 48,138 C46,120 46,100 46,84 Z"
+              fill="url(#gemGradient)" opacity="0.95" />
+        <path d="M60,82 C64,100 64,120 60,138 C56,140 52,140 52,138 C54,120 54,100 54,84 Z"
+              fill="url(#gemGradient)" opacity="0.95" />
       </g>
 
+      <!-- Female body: tapered torso + flowing skirt -->
       <g id="body-female">
-        <rect x="38" y="48" width="24" height="30" rx="10" fill="url(#gemGradient)" />
-        <rect x="14" y="52" width="14" height="40" rx="7" fill="url(#gemGradient)" />
-        <rect x="72" y="52" width="14" height="40" rx="7" fill="url(#gemGradient)" />
-        <polygon points="30,78 70,78 62,120 38,120" fill="url(#gemGradient)" />
-        <rect x="30" y="120" width="14" height="45" rx="7" fill="url(#gemGradient)" />
-        <rect x="56" y="120" width="14" height="45" rx="7" fill="url(#gemGradient)" />
-        <line x1="42" y1="52" x2="42" y2="110" stroke="white" stroke-width="1.5" opacity="0.3" />
+        <path d="M40,42 C37,52 37,62 40,70 L60,70 C63,62 63,52 60,42 C56,38 44,38 40,42 Z"
+              fill="url(#gemGradient)" stroke="white" stroke-opacity="0.2" stroke-width="1" />
+        <path d="M37,46 C28,50 23,60 25,74 C26,78 31,78 31,74 C30,64 32,56 37,50 Z"
+              fill="url(#gemGradient)" opacity="0.95" />
+        <path d="M63,46 C72,50 77,60 75,74 C74,78 69,78 69,74 C70,64 68,56 63,50 Z"
+              fill="url(#gemGradient)" opacity="0.95" />
+        <path d="M32,70 L68,70 C72,86 66,100 58,102 L42,102 C34,100 28,86 32,70 Z"
+              fill="url(#gemGradient)" opacity="0.95" />
+        <path d="M42,102 C38,116 38,128 41,138 C44,140 47,140 47,138 C46,128 46,116 47,104 Z"
+              fill="url(#gemGradient)" opacity="0.95" />
+        <path d="M58,102 C62,116 62,128 59,138 C56,140 53,140 53,138 C54,128 54,116 53,104 Z"
+              fill="url(#gemGradient)" opacity="0.95" />
       </g>
     </svg>
   </div>
@@ -152,24 +163,35 @@
     const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5mcmpwY2NqYmpza212dWdsaG50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyOTA1MTEsImV4cCI6MjEwNDg2NjUxMX0.--QAVv1DIG6GRHo4ayydgfQ31TnWTqBsQwdhqNWxm5M";
     const client = supabase.createClient(supabaseUrl, supabaseKey);
 
+    // Green -> Blue -> Red, each with a matching mid-tone for a richer gradient
     const stops = [
-      { score: 0,   rgb: [59, 130, 246],  label: "NORMAL" },
-      { score: 50,  rgb: [236, 72, 153],  label: "CAUTION" },
-      { score: 100, rgb: [239, 68, 68],   label: "ABNORMAL" }
+      { score: 0,   edge: [22, 101, 52],  mid: [74, 222, 128],  label: "NORMAL" },   // deep green -> bright green
+      { score: 50,  edge: [30, 58, 138],  mid: [96, 165, 250],  label: "CAUTION" },  // deep blue -> bright blue
+      { score: 100, edge: [153, 27, 27],  mid: [248, 113, 113], label: "ABNORMAL" } // deep red -> bright red
     ];
 
-    function scoreToColor(score) {
+    function blend(a, b, t) {
+      return a.map((c, i) => Math.round(c + t * (b[i] - c)));
+    }
+
+    function scoreToColors(score) {
       score = Math.max(0, Math.min(100, score));
       for (let i = 0; i < stops.length - 1; i++) {
         const a = stops[i], b = stops[i + 1];
         if (score >= a.score && score <= b.score) {
           const t = (score - a.score) / (b.score - a.score);
-          const rgb = a.rgb.map((c, idx) => Math.round(c + t * (b.rgb[idx] - c)));
+          const edge = blend(a.edge, b.edge, t);
+          const mid = blend(a.mid, b.mid, t);
           const label = t < 0.5 ? a.label : b.label;
-          return { css: `rgb(${rgb[0]},${rgb[1]},${rgb[2]})`, label };
+          return {
+            edgeCss: `rgb(${edge.join(",")})`,
+            midCss: `rgb(${mid.join(",")})`,
+            label
+          };
         }
       }
-      return { css: `rgb(${stops.at(-1).rgb.join(",")})`, label: stops.at(-1).label };
+      const last = stops.at(-1);
+      return { edgeCss: `rgb(${last.edge.join(",")})`, midCss: `rgb(${last.mid.join(",")})`, label: last.label };
     }
 
     function computeScore(r) {
@@ -180,7 +202,6 @@
       return Math.min(Math.round((worstDev / 3) * 100), 100);
     }
 
-    // Scatter sparkle particles once, around the figure
     function createSparkles() {
       const wrap = document.getElementById("figureWrap");
       for (let i = 0; i < 14; i++) {
@@ -215,16 +236,16 @@
         }
 
         const score = computeScore(r);
-        const { css, label } = scoreToColor(score);
+        const { edgeCss, midCss, label } = scoreToColors(score);
 
-        document.getElementById("gemEdge").setAttribute("stop-color", css);
-        document.getElementById("aura").style.setProperty("--glow", css);
+        document.getElementById("gemEdge").setAttribute("stop-color", edgeCss);
+        document.getElementById("gemMid").setAttribute("stop-color", midCss);
         document.getElementById("aura").style.background =
-          `radial-gradient(circle, #fff4d6 0%, ${css} 45%, transparent 75%)`;
+          `radial-gradient(circle, #fffdf2 0%, ${midCss} 40%, transparent 75%)`;
 
         const labelEl = document.getElementById("status-label");
         labelEl.innerText = label;
-        labelEl.style.color = css;
+        labelEl.style.color = midCss;
       }
     }
 
