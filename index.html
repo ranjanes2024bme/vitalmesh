@@ -6,23 +6,24 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     body { font-family: sans-serif; background: #0f172a; color: white; text-align: center; padding: 40px; }
-    #vitals { font-size: 24px; margin-top: 20px; }
+    #vitals { font-size: 22px; margin-top: 20px; }
+    #status-label { font-size: 20px; font-weight: bold; margin-top: 8px; letter-spacing: 1px; }
 
     #dot {
       width: 100px;
       margin: 20px auto;
       display: block;
-      color: #22d3ee;
-      transition: color 0.5s;
+      color: #3b82f6;
+      transition: color 1.5s ease-in-out, filter 1.5s ease-in-out;
       animation: pulse 1s infinite ease-in-out;
     }
 
     #body-male, #body-female { display: none; }
 
     @keyframes pulse {
-      0%   { transform: scale(1);    filter: drop-shadow(0 0 10px currentColor); }
-      50%  { transform: scale(1.08); filter: drop-shadow(0 0 25px currentColor); }
-      100% { transform: scale(1);    filter: drop-shadow(0 0 10px currentColor); }
+      0%   { transform: scale(1);    filter: drop-shadow(0 0 8px currentColor) drop-shadow(0 0 22px currentColor); }
+      50%  { transform: scale(1.08); filter: drop-shadow(0 0 14px currentColor) drop-shadow(0 0 34px currentColor); }
+      100% { transform: scale(1);    filter: drop-shadow(0 0 8px currentColor) drop-shadow(0 0 22px currentColor); }
     }
   </style>
 </head>
@@ -31,6 +32,7 @@
 
   <svg id="dot" width="100" height="170" viewBox="0 0 100 170" xmlns="http://www.w3.org/2000/svg">
     <circle cx="50" cy="25" r="20" fill="currentColor" />
+    <ellipse cx="43" cy="18" rx="6" ry="4" fill="white" opacity="0.35" />
 
     <g id="body-male">
       <rect x="35" y="48" width="30" height="55" rx="12" fill="currentColor" />
@@ -50,6 +52,7 @@
     </g>
   </svg>
 
+  <div id="status-label">VERY GOOD</div>
   <div id="vitals">Waiting for data...</div>
 
   <script>
@@ -57,8 +60,42 @@
     const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5mcmpwY2NqYmpza212dWdsaG50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyOTA1MTEsImV4cCI6MjEwNDg2NjUxMX0.--QAVv1DIG6GRHo4ayydgfQ31TnWTqBsQwdhqNWxm5M";
     const client = supabase.createClient(supabaseUrl, supabaseKey);
 
+    // The 6 gem-tone stops, in order from best (0) to worst (100)
+    const gradientStops = [
+      { score: 0,   rgb: [59, 130, 246],  label: "VERY GOOD" }, // blue
+      { score: 20,  rgb: [30, 58, 138],   label: "BETTER" },    // dark blue
+      { score: 40,  rgb: [139, 92, 246],  label: "GOOD" },      // purple
+      { score: 60,  rgb: [236, 72, 153],  label: "AVERAGE" },   // pink
+      { score: 80,  rgb: [245, 158, 11],  label: "BAD" },       // amber
+      { score: 100, rgb: [239, 68, 68],   label: "WORSE" }      // red
+    ];
+
+    // Smoothly blend between two neighboring gem colors based on exact score
+    function scoreToColor(score) {
+      score = Math.max(0, Math.min(100, score));
+      for (let i = 0; i < gradientStops.length - 1; i++) {
+        const a = gradientStops[i], b = gradientStops[i + 1];
+        if (score >= a.score && score <= b.score) {
+          const t = (score - a.score) / (b.score - a.score);
+          const rgb = a.rgb.map((c, idx) => Math.round(c + t * (b.rgb[idx] - c)));
+          const label = t < 0.5 ? a.label : b.label;
+          return { css: `rgb(${rgb[0]},${rgb[1]},${rgb[2]})`, label };
+        }
+      }
+      return { css: `rgb(${gradientStops.at(-1).rgb.join(",")})`, label: gradientStops.at(-1).label };
+    }
+
+    // Combine hr, spo2, temp deviation from normal into one 0-100 score
+    function computeScore(r) {
+      const hrDev = Math.abs((r.hr ?? 72) - 72) / 12;
+      const spo2Dev = Math.abs((r.spo2 ?? 97) - 97) / 3;
+      const tempDev = Math.abs((r.temp ?? 36.8) - 36.8) / 0.6;
+      const weighted = 0.4 * Math.min(hrDev, 3) + 0.4 * Math.min(spo2Dev, 3) + 0.2 * Math.min(tempDev, 3);
+      return Math.min(Math.round((weighted / 3) * 100), 100);
+    }
+
     async function loadLatest() {
-      const { data, error } = await client
+      const { data } = await client
         .from("readings")
         .select("*")
         .order("created_at", { ascending: false })
@@ -81,13 +118,13 @@
           bodyFemale.style.display = "none";
         }
 
-        let color = "#22d3ee";
-        if (r.hr > 100 || r.spo2 < 92) {
-          color = "#ef4444";
-        } else if (r.hr > 90 || r.spo2 < 95) {
-          color = "#f59e0b";
-        }
-        dot.style.color = color;
+        const score = computeScore(r);
+        const { css, label } = scoreToColor(score);
+        dot.style.color = css;
+
+        const labelEl = document.getElementById("status-label");
+        labelEl.innerText = label;
+        labelEl.style.color = css;
 
         const beatSeconds = r.hr ? (60 / r.hr) : 1;
         dot.style.animationDuration = beatSeconds + "s";
