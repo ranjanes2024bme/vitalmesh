@@ -87,11 +87,15 @@
 
     // Combine hr, spo2, temp deviation from normal into one 0-100 score
     function computeScore(r) {
-      const hrDev = Math.abs((r.hr ?? 72) - 72) / 12;
-      const spo2Dev = Math.abs((r.spo2 ?? 97) - 97) / 3;
-      const tempDev = Math.abs((r.temp ?? 36.8) - 36.8) / 0.6;
-      const weighted = 0.4 * Math.min(hrDev, 3) + 0.4 * Math.min(spo2Dev, 3) + 0.2 * Math.min(tempDev, 3);
-      return Math.min(Math.round((weighted / 3) * 100), 100);
+  const hrDev = Math.abs((r.hr ?? 72) - 72) / 12;
+  const spo2Dev = Math.abs((r.spo2 ?? 97) - 97) / 3;
+  const tempDev = Math.abs((r.temp ?? 36.8) - 36.8) / 0.6;
+
+  // Take whichever vital is MOST abnormal - one severely bad reading
+  // should be enough to raise concern, not get diluted by the others
+  const worstDev = Math.max(hrDev, spo2Dev, tempDev);
+  return Math.min(Math.round((worstDev / 3) * 100), 100);
+}
     }
 
     async function loadLatest() {
