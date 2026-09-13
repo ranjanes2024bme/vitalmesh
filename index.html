@@ -21,9 +21,9 @@
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
       z-index: -1;
-      background: radial-gradient(circle at 20% 30%, rgba(34,197,94,0.10), transparent 60%),
-                  radial-gradient(circle at 80% 70%, rgba(59,130,246,0.09), transparent 60%),
-                  radial-gradient(circle at 50% 90%, rgba(239,68,68,0.07), transparent 60%);
+      background: radial-gradient(circle at 20% 30%, rgba(0,255,127,0.10), transparent 60%),
+                  radial-gradient(circle at 80% 70%, rgba(0,153,255,0.09), transparent 60%),
+                  radial-gradient(circle at 50% 90%, rgba(255,23,68,0.07), transparent 60%);
       background-size: 200% 200%;
       animation: drift 18s ease-in-out infinite;
     }
@@ -33,38 +33,42 @@
       100% { background-position: 0% 0%, 100% 100%, 50% 100%; }
     }
 
+    #patient-id { font-size: 14px; color: #64748b; letter-spacing: 1px; margin-top: 4px; }
     #vitals { font-size: 22px; margin-top: 20px; }
     #status-label { font-size: 20px; font-weight: bold; margin-top: 8px; letter-spacing: 2px; }
 
-    .figure-wrap { position: relative; width: 170px; height: 230px; margin: 30px auto; }
+    .figure-wrap { position: relative; width: 170px; height: 230px; margin: 30px auto; overflow: visible; }
 
     #aura {
       position: absolute;
       top: 45%; left: 50%;
-      width: 220px; height: 220px;
+      width: 240px; height: 240px;
       transform: translate(-50%, -50%);
       border-radius: 50%;
-      filter: blur(30px);
-      opacity: 0.6;
-      animation: auraPulse 2.4s ease-in-out infinite;
+      filter: blur(28px);
+      opacity: 0.7;
+      animation: auraPulse 2s ease-in-out infinite;
       z-index: 0;
     }
     @keyframes auraPulse {
-      0%, 100% { transform: translate(-50%, -50%) scale(1);    opacity: 0.5; }
-      50%      { transform: translate(-50%, -50%) scale(1.14); opacity: 0.8; }
+      0%, 100% { transform: translate(-50%, -50%) scale(1);    opacity: 0.6; }
+      50%      { transform: translate(-50%, -50%) scale(1.16); opacity: 0.95; }
     }
 
-    .sparkle {
+    /* Rising spark particles - the "fire travelling upward" effect */
+    .spark {
       position: absolute;
-      width: 3px; height: 3px;
-      background: white;
+      bottom: 20px;
+      width: 4px; height: 4px;
       border-radius: 50%;
       opacity: 0;
-      animation: twinkle 3s ease-in-out infinite;
+      animation: riseUp 2.5s ease-in infinite;
     }
-    @keyframes twinkle {
-      0%, 100% { opacity: 0; transform: scale(0.5); }
-      50%      { opacity: 1; transform: scale(1.4); }
+    @keyframes riseUp {
+      0%   { opacity: 0; transform: translateY(0) scale(0.6); }
+      15%  { opacity: 1; }
+      80%  { opacity: 0.6; }
+      100% { opacity: 0; transform: translateY(-180px) scale(1.2); }
     }
 
     #dot {
@@ -73,12 +77,12 @@
       width: 120px;
       display: block;
       margin: 45px auto 0;
-      animation: pulse 2.2s ease-in-out infinite;
-      filter: drop-shadow(0 0 8px rgba(255,255,255,0.3));
+      animation: pulse 1.6s ease-in-out infinite;
+      filter: drop-shadow(0 0 12px rgba(255,255,255,0.4));
     }
     @keyframes pulse {
       0%, 100% { transform: scale(1); }
-      50%      { transform: scale(1.05); }
+      50%      { transform: scale(1.06); }
     }
 
     #body-male, #body-female { display: none; }
@@ -99,39 +103,40 @@
   <div class="wave-bg"></div>
 
   <h1>VitalMesh</h1>
+  <div id="patient-id">Patient: --</div>
 
   <div class="figure-wrap" id="figureWrap">
     <div id="aura"></div>
 
     <svg id="dot" viewBox="0 0 100 190" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <linearGradient id="stickGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#fffdf2" />
-          <stop offset="40%" id="gemMid" stop-color="#4ade80" />
-          <stop offset="100%" id="gemEdge" stop-color="#166534" />
+        <linearGradient id="stickGradient" x1="0%" y1="100%" x2="0%" y2="0%">
+          <stop offset="0%" id="gemEdge" stop-color="#166534" />
+          <stop offset="45%" id="gemMid" stop-color="#00FF7F" />
+          <stop offset="100%" stop-color="#ffffff" />
         </linearGradient>
       </defs>
 
       <!-- Head -->
-      <circle cx="50" cy="22" r="14" fill="none" stroke="url(#stickGradient)" stroke-width="4" />
+      <circle cx="50" cy="22" r="14" fill="none" stroke="url(#stickGradient)" stroke-width="7" stroke-linecap="round" />
 
-      <!-- Body: straight stick lines -->
-      <g id="body-male" stroke="url(#stickGradient)" stroke-width="4" stroke-linecap="round" fill="none">
-        <line x1="50" y1="36" x2="50" y2="100" />              <!-- spine -->
-        <line x1="50" y1="50" x2="22" y2="75" />                <!-- left arm -->
-        <line x1="50" y1="50" x2="78" y2="75" />                <!-- right arm -->
-        <line x1="50" y1="100" x2="28" y2="150" />              <!-- left leg -->
-        <line x1="50" y1="100" x2="72" y2="150" />              <!-- right leg -->
+      <!-- Bold stick body: male -->
+      <g id="body-male" stroke="url(#stickGradient)" stroke-width="7" stroke-linecap="round" fill="none">
+        <line x1="50" y1="38" x2="50" y2="100" />
+        <line x1="50" y1="52" x2="20" y2="78" />
+        <line x1="50" y1="52" x2="80" y2="78" />
+        <line x1="50" y1="100" x2="26" y2="152" />
+        <line x1="50" y1="100" x2="74" y2="152" />
       </g>
 
-      <!-- Body: stick lines with a "dress" triangle for female figure -->
-      <g id="body-female" stroke="url(#stickGradient)" stroke-width="4" stroke-linecap="round" fill="none">
-        <line x1="50" y1="36" x2="50" y2="80" />                <!-- spine -->
-        <line x1="50" y1="50" x2="22" y2="75" />                <!-- left arm -->
-        <line x1="50" y1="50" x2="78" y2="75" />                <!-- right arm -->
-        <path d="M38,80 L62,80 L72,115 L28,115 Z" />            <!-- skirt triangle -->
-        <line x1="42" y1="115" x2="32" y2="150" />              <!-- left leg -->
-        <line x1="58" y1="115" x2="68" y2="150" />              <!-- right leg -->
+      <!-- Bold stick body: female -->
+      <g id="body-female" stroke="url(#stickGradient)" stroke-width="7" stroke-linecap="round" fill="none">
+        <line x1="50" y1="38" x2="50" y2="80" />
+        <line x1="50" y1="52" x2="20" y2="78" />
+        <line x1="50" y1="52" x2="80" y2="78" />
+        <path d="M36,80 L64,80 L74,116 L26,116 Z" />
+        <line x1="40" y1="116" x2="30" y2="152" />
+        <line x1="60" y1="116" x2="70" y2="152" />
       </g>
     </svg>
   </div>
@@ -151,10 +156,11 @@
     const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5mcmpwY2NqYmpza212dWdsaG50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyOTA1MTEsImV4cCI6MjEwNDg2NjUxMX0.--QAVv1DIG6GRHo4ayydgfQ31TnWTqBsQwdhqNWxm5M";
     const client = supabase.createClient(supabaseUrl, supabaseKey);
 
+    // Bright, vivid neon tones - Green -> Blue -> Red
     const stops = [
-      { score: 0,   edge: [22, 101, 52],  mid: [74, 222, 128],  label: "NORMAL" },
-      { score: 50,  edge: [30, 58, 138],  mid: [96, 165, 250],  label: "CAUTION" },
-      { score: 100, edge: [153, 27, 27],  mid: [248, 113, 113], label: "ABNORMAL" }
+      { score: 0,   edge: [0, 100, 50],   mid: [0, 255, 127],  label: "NORMAL" },
+      { score: 50,  edge: [0, 60, 140],   mid: [0, 153, 255],  label: "CAUTION" },
+      { score: 100, edge: [140, 0, 20],   mid: [255, 23, 68],  label: "ABNORMAL" }
     ];
 
     function blend(a, b, t) {
@@ -185,15 +191,18 @@
       return Math.min(Math.round((worstDev / 3) * 100), 100);
     }
 
-    function createSparkles() {
+    // Rising spark particles, colored to match current status
+    function createSparks(color) {
       const wrap = document.getElementById("figureWrap");
-      for (let i = 0; i < 14; i++) {
+      wrap.querySelectorAll(".spark").forEach(el => el.remove());
+      for (let i = 0; i < 10; i++) {
         const s = document.createElement("div");
-        s.className = "sparkle";
-        s.style.left = Math.random() * 100 + "%";
-        s.style.top = Math.random() * 100 + "%";
-        s.style.animationDelay = (Math.random() * 3) + "s";
-        s.style.animationDuration = (2 + Math.random() * 2) + "s";
+        s.className = "spark";
+        s.style.left = (30 + Math.random() * 40) + "%";
+        s.style.background = color;
+        s.style.boxShadow = `0 0 8px ${color}`;
+        s.style.animationDelay = (Math.random() * 2.5) + "s";
+        s.style.animationDuration = (1.8 + Math.random() * 1.4) + "s";
         wrap.appendChild(s);
       }
     }
@@ -207,6 +216,7 @@
 
       if (data && data.length > 0) {
         const r = data[0];
+        document.getElementById("patient-id").innerText = "Patient: " + (r.patient_id || "--");
         document.getElementById("vitals").innerText =
           `HR: ${r.hr} bpm | SpO2: ${r.spo2}% | Temp: ${r.temp}°C`;
 
@@ -224,7 +234,9 @@
         document.getElementById("gemEdge").setAttribute("stop-color", edgeCss);
         document.getElementById("gemMid").setAttribute("stop-color", midCss);
         document.getElementById("aura").style.background =
-          `radial-gradient(circle, #fffdf2 0%, ${midCss} 40%, transparent 75%)`;
+          `radial-gradient(circle, ${midCss} 0%, ${edgeCss} 55%, transparent 75%)`;
+
+        createSparks(midCss);
 
         const labelEl = document.getElementById("status-label");
         labelEl.innerText = label;
@@ -232,7 +244,6 @@
       }
     }
 
-    createSparkles();
     loadLatest();
     setInterval(loadLatest, 3000);
   </script>
