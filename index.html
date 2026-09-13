@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -6,26 +7,49 @@
   <style>
     body { font-family: sans-serif; background: #0f172a; color: white; text-align: center; padding: 40px; }
     #vitals { font-size: 24px; margin-top: 20px; }
-    #dot {
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  margin: 20px auto;
-  background: #22d3ee;
-  transition: background 0.5s;
-  animation: pulse 1s infinite ease-in-out;
-}
 
-@keyframes pulse {
-  0%   { transform: scale(1);   box-shadow: 0 0 20px currentColor; }
-  50%  { transform: scale(1.15); box-shadow: 0 0 40px currentColor; }
-  100% { transform: scale(1);   box-shadow: 0 0 20px currentColor; }
-}
+    #dot {
+      width: 100px;
+      margin: 20px auto;
+      display: block;
+      color: #22d3ee;
+      transition: color 0.5s;
+      animation: pulse 1s infinite ease-in-out;
+    }
+
+    #body-male, #body-female { display: none; }
+
+    @keyframes pulse {
+      0%   { transform: scale(1);    filter: drop-shadow(0 0 10px currentColor); }
+      50%  { transform: scale(1.08); filter: drop-shadow(0 0 25px currentColor); }
+      100% { transform: scale(1);    filter: drop-shadow(0 0 10px currentColor); }
+    }
   </style>
 </head>
 <body>
   <h1>VitalMesh</h1>
-  <div id="dot"></div>
+
+  <svg id="dot" width="100" height="170" viewBox="0 0 100 170" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="50" cy="25" r="20" fill="currentColor" />
+
+    <g id="body-male">
+      <rect x="35" y="48" width="30" height="55" rx="12" fill="currentColor" />
+      <rect x="14" y="52" width="14" height="48" rx="7" fill="currentColor" />
+      <rect x="72" y="52" width="14" height="48" rx="7" fill="currentColor" />
+      <rect x="30" y="103" width="14" height="55" rx="7" fill="currentColor" />
+      <rect x="56" y="103" width="14" height="55" rx="7" fill="currentColor" />
+    </g>
+
+    <g id="body-female">
+      <rect x="38" y="48" width="24" height="30" rx="10" fill="currentColor" />
+      <rect x="14" y="52" width="14" height="40" rx="7" fill="currentColor" />
+      <rect x="72" y="52" width="14" height="40" rx="7" fill="currentColor" />
+      <polygon points="30,78 70,78 62,120 38,120" fill="currentColor" />
+      <rect x="30" y="120" width="14" height="45" rx="7" fill="currentColor" />
+      <rect x="56" y="120" width="14" height="45" rx="7" fill="currentColor" />
+    </g>
+  </svg>
+
   <div id="vitals">Waiting for data...</div>
 
   <script>
@@ -46,20 +70,27 @@
           `HR: ${r.hr} bpm | SpO2: ${r.spo2}% | Temp: ${r.temp}°C`;
 
         const dot = document.getElementById("dot");
+        const bodyMale = document.getElementById("body-male");
+        const bodyFemale = document.getElementById("body-female");
 
-// Decide color based on how abnormal the reading is
-let color = "#22d3ee"; // calm blue
-if (r.hr > 100 || r.spo2 < 92) {
-  color = "#ef4444"; // alert red
-} else if (r.hr > 90 || r.spo2 < 95) {
-  color = "#f59e0b"; // caution amber
-}
-dot.style.background = color;
-dot.style.color = color; // needed so box-shadow's "currentColor" matches
+        if (r.gender === "female") {
+          bodyFemale.style.display = "inline";
+          bodyMale.style.display = "none";
+        } else {
+          bodyMale.style.display = "inline";
+          bodyFemale.style.display = "none";
+        }
 
-// Make the pulse speed match the actual heart rate
-const beatSeconds = r.hr ? (60 / r.hr) : 1;
-dot.style.animationDuration = beatSeconds + "s";
+        let color = "#22d3ee";
+        if (r.hr > 100 || r.spo2 < 92) {
+          color = "#ef4444";
+        } else if (r.hr > 90 || r.spo2 < 95) {
+          color = "#f59e0b";
+        }
+        dot.style.color = color;
+
+        const beatSeconds = r.hr ? (60 / r.hr) : 1;
+        dot.style.animationDuration = beatSeconds + "s";
       }
     }
 
