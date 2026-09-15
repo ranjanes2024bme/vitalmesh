@@ -37,53 +37,39 @@
     #vitals { font-size: 22px; margin-top: 20px; }
     #status-label { font-size: 20px; font-weight: bold; margin-top: 8px; letter-spacing: 2px; }
 
-    .figure-wrap { position: relative; width: 170px; height: 230px; margin: 30px auto; overflow: visible; }
+    .figure-wrap { position: relative; width: 190px; height: 260px; margin: 30px auto; }
 
     #aura {
       position: absolute;
       top: 45%; left: 50%;
-      width: 240px; height: 240px;
+      width: 260px; height: 260px;
       transform: translate(-50%, -50%);
       border-radius: 50%;
-      filter: blur(28px);
-      opacity: 0.7;
+      filter: blur(34px);
+      opacity: 0.6;
       animation: auraPulse 2s ease-in-out infinite;
       z-index: 0;
     }
     @keyframes auraPulse {
-      0%, 100% { transform: translate(-50%, -50%) scale(1);    opacity: 0.6; }
-      50%      { transform: translate(-50%, -50%) scale(1.16); opacity: 0.95; }
+      0%, 100% { transform: translate(-50%, -50%) scale(1);    opacity: 0.5; }
+      50%      { transform: translate(-50%, -50%) scale(1.15); opacity: 0.85; }
     }
 
-    /* Rising spark particles - the "fire travelling upward" effect */
-    .spark {
-      position: absolute;
-      bottom: 20px;
-      width: 4px; height: 4px;
-      border-radius: 50%;
-      opacity: 0;
-      animation: riseUp 2.5s ease-in infinite;
+    #figureSvg { position: relative; z-index: 1; width: 100%; height: 100%; }
+
+    .particle {
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: rise linear infinite;
     }
-    @keyframes riseUp {
-      0%   { opacity: 0; transform: translateY(0) scale(0.6); }
-      15%  { opacity: 1; }
-      80%  { opacity: 0.6; }
-      100% { opacity: 0; transform: translateY(-180px) scale(1.2); }
+    @keyframes rise {
+      0%   { transform: translateY(0) scale(0.6); opacity: 0; }
+      12%  { opacity: 1; }
+      85%  { opacity: 0.7; }
+      100% { transform: translateY(-190px) scale(1); opacity: 0; }
     }
 
-    #dot {
-      position: relative;
-      z-index: 1;
-      width: 120px;
-      display: block;
-      margin: 45px auto 0;
-      animation: pulse 1.6s ease-in-out infinite;
-      filter: drop-shadow(0 0 12px rgba(255,255,255,0.4));
-    }
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); }
-      50%      { transform: scale(1.06); }
-    }
+    .silhouette-outline { fill: none; stroke-width: 2; opacity: 0.8; }
 
     #body-male, #body-female { display: none; }
 
@@ -105,49 +91,70 @@
   <h1>VitalMesh</h1>
   <div id="patient-id">Patient: --</div>
 
-  <div class="figure-wrap" id="figureWrap">
+  <div class="figure-wrap">
     <div id="aura"></div>
 
-    <svg id="dot" viewBox="0 0 100 190" xmlns="http://www.w3.org/2000/svg">
+    <svg id="figureSvg" viewBox="0 0 100 190" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <linearGradient id="stickGradient" x1="0%" y1="100%" x2="0%" y2="0%">
-          <stop offset="0%" id="gemEdge" stop-color="#166534" />
-          <stop offset="45%" id="gemMid" stop-color="#00FF7F" />
-          <stop offset="100%" stop-color="#ffffff" />
-        </linearGradient>
+        <!-- Male silhouette stencil -->
+        <clipPath id="clip-male">
+          <circle cx="50" cy="22" r="15" />
+          <rect x="38" y="40" width="24" height="55" rx="10" />
+          <rect x="16" y="44" width="14" height="50" rx="7" />
+          <rect x="70" y="44" width="14" height="50" rx="7" />
+          <rect x="32" y="95" width="13" height="62" rx="6" />
+          <rect x="55" y="95" width="13" height="62" rx="6" />
+        </clipPath>
+
+        <!-- Female silhouette stencil -->
+        <clipPath id="clip-female">
+          <circle cx="50" cy="22" r="15" />
+          <rect x="40" y="40" width="20" height="25" rx="8" />
+          <rect x="16" y="44" width="14" height="42" rx="7" />
+          <rect x="70" y="44" width="14" height="42" rx="7" />
+          <polygon points="34,65 66,65 76,105 24,105" />
+          <rect x="36" y="105" width="12" height="52" rx="6" />
+          <rect x="52" y="105" width="12" height="52" rx="6" />
+        </clipPath>
       </defs>
 
-      <!-- Head -->
-      <circle cx="50" cy="22" r="14" fill="none" stroke="url(#stickGradient)" stroke-width="7" stroke-linecap="round" />
-
-      <!-- Bold stick body: male -->
-      <g id="body-male" stroke="url(#stickGradient)" stroke-width="7" stroke-linecap="round" fill="none">
-        <line x1="50" y1="38" x2="50" y2="100" />
-        <line x1="50" y1="52" x2="20" y2="78" />
-        <line x1="50" y1="52" x2="80" y2="78" />
-        <line x1="50" y1="100" x2="26" y2="152" />
-        <line x1="50" y1="100" x2="74" y2="152" />
+      <!-- MALE figure -->
+      <g id="body-male">
+        <!-- Faint base fill so the shape reads even without particles -->
+        <g clip-path="url(#clip-male)">
+          <rect x="0" y="0" width="100" height="190" id="fillMale" fill="#0f2418" />
+        </g>
+        <!-- Particle field, clipped to the silhouette -->
+        <g clip-path="url(#clip-male)" id="particlesMale"></g>
+        <!-- Crisp outline on top for definition -->
+        <g class="silhouette-outline" id="outlineMale">
+          <circle cx="50" cy="22" r="15" />
+          <rect x="38" y="40" width="24" height="55" rx="10" />
+          <rect x="16" y="44" width="14" height="50" rx="7" />
+          <rect x="70" y="44" width="14" height="50" rx="7" />
+          <rect x="32" y="95" width="13" height="62" rx="6" />
+          <rect x="55" y="95" width="13" height="62" rx="6" />
+        </g>
       </g>
 
-      <!-- Bold stick body: female -->
-<g id="body-female" stroke="url(#stickGradient)" stroke-width="7" stroke-linecap="round" fill="none">
-  <!-- Small bow/hair detail near the head, drawn first so it sits behind -->
-  <path d="M38,10 L50,16 L62,10" stroke-width="5" opacity="0.9" />
-
-  <!-- Arms -->
-  <line x1="50" y1="52" x2="20" y2="78" />
-  <line x1="50" y1="52" x2="80" y2="78" />
-
-  <!-- Skirt drawn BEFORE the spine, so spine paints on top and stays visible -->
-  <path d="M36,80 L64,80 L74,116 L26,116 Z" />
-
-  <!-- Spine: now drawn after the skirt, so it's visible straight through it -->
-  <line x1="50" y1="38" x2="50" y2="140" />
-
-  <!-- Legs, starting below the skirt -->
-  <line x1="40" y1="116" x2="30" y2="152" />
-  <line x1="60" y1="116" x2="70" y2="152" />
-</g>
+      <!-- FEMALE figure -->
+      <g id="body-female">
+        <g clip-path="url(#clip-female)">
+          <rect x="0" y="0" width="100" height="190" id="fillFemale" fill="#0f2418" />
+        </g>
+        <g clip-path="url(#clip-female)" id="particlesFemale"></g>
+        <g class="silhouette-outline" id="outlineFemale">
+          <circle cx="50" cy="22" r="15" />
+          <rect x="40" y="40" width="20" height="25" rx="8" />
+          <rect x="16" y="44" width="14" height="42" rx="7" />
+          <rect x="70" y="44" width="14" height="42" rx="7" />
+          <polygon points="34,65 66,65 76,105 24,105" />
+          <rect x="36" y="105" width="12" height="52" rx="6" />
+          <rect x="52" y="105" width="12" height="52" rx="6" />
+        </g>
+      </g>
+    </svg>
+  </div>
 
   <div id="status-label">NORMAL</div>
   <div id="vitals">Waiting for data...</div>
@@ -164,31 +171,27 @@
     const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5mcmpwY2NqYmpza212dWdsaG50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyOTA1MTEsImV4cCI6MjEwNDg2NjUxMX0.--QAVv1DIG6GRHo4ayydgfQ31TnWTqBsQwdhqNWxm5M";
     const client = supabase.createClient(supabaseUrl, supabaseKey);
 
-    // Bright, vivid neon tones - Green -> Blue -> Red
     const stops = [
-      { score: 0,   edge: [0, 100, 50],   mid: [0, 255, 127],  label: "NORMAL" },
-      { score: 50,  edge: [0, 60, 140],   mid: [0, 153, 255],  label: "CAUTION" },
-      { score: 100, edge: [140, 0, 20],   mid: [255, 23, 68],  label: "ABNORMAL" }
+      { score: 0,   rgb: [0, 255, 127],  label: "NORMAL" },
+      { score: 50,  rgb: [0, 153, 255],  label: "CAUTION" },
+      { score: 100, rgb: [255, 23, 68],  label: "ABNORMAL" }
     ];
 
-    function blend(a, b, t) {
-      return a.map((c, i) => Math.round(c + t * (b[i] - c)));
-    }
+    function blend(a, b, t) { return a.map((c, i) => Math.round(c + t * (b[i] - c))); }
 
-    function scoreToColors(score) {
+    function scoreToColor(score) {
       score = Math.max(0, Math.min(100, score));
       for (let i = 0; i < stops.length - 1; i++) {
         const a = stops[i], b = stops[i + 1];
         if (score >= a.score && score <= b.score) {
           const t = (score - a.score) / (b.score - a.score);
-          const edge = blend(a.edge, b.edge, t);
-          const mid = blend(a.mid, b.mid, t);
+          const rgb = blend(a.rgb, b.rgb, t);
           const label = t < 0.5 ? a.label : b.label;
-          return { edgeCss: `rgb(${edge.join(",")})`, midCss: `rgb(${mid.join(",")})`, label };
+          return { css: `rgb(${rgb.join(",")})`, label };
         }
       }
       const last = stops.at(-1);
-      return { edgeCss: `rgb(${last.edge.join(",")})`, midCss: `rgb(${last.mid.join(",")})`, label: last.label };
+      return { css: `rgb(${last.rgb.join(",")})`, label: last.label };
     }
 
     function computeScore(r) {
@@ -199,20 +202,36 @@
       return Math.min(Math.round((worstDev / 3) * 100), 100);
     }
 
-    // Rising spark particles, colored to match current status
-    function createSparks(color) {
-      const wrap = document.getElementById("figureWrap");
-      wrap.querySelectorAll(".spark").forEach(el => el.remove());
-      for (let i = 0; i < 10; i++) {
-        const s = document.createElement("div");
-        s.className = "spark";
-        s.style.left = (30 + Math.random() * 40) + "%";
-        s.style.background = color;
-        s.style.boxShadow = `0 0 8px ${color}`;
-        s.style.animationDelay = (Math.random() * 2.5) + "s";
-        s.style.animationDuration = (1.8 + Math.random() * 1.4) + "s";
-        wrap.appendChild(s);
+    // Fill each silhouette's particle group with glowing dots, once
+    function createParticles(containerId, count = 35) {
+      const ns = "http://www.w3.org/2000/svg";
+      const group = document.getElementById(containerId);
+      group.innerHTML = "";
+      for (let i = 0; i < count; i++) {
+        const c = document.createElementNS(ns, "circle");
+        const x = 15 + Math.random() * 70;
+        c.setAttribute("cx", x);
+        c.setAttribute("cy", 185);
+        c.setAttribute("r", 1.5 + Math.random() * 1.8);
+        c.setAttribute("class", "particle");
+        c.style.fill = "currentColor";
+        c.style.animationDuration = (2 + Math.random() * 2.2) + "s";
+        c.style.animationDelay = (Math.random() * 3) + "s";
+        group.appendChild(c);
       }
+    }
+
+    function setColor(color) {
+      document.getElementById("particlesMale").style.color = color;
+      document.getElementById("particlesFemale").style.color = color;
+      document.getElementById("outlineMale").style.stroke = color;
+      document.getElementById("outlineFemale").style.stroke = color;
+      document.getElementById("fillMale").setAttribute("fill", color);
+      document.getElementById("fillFemale").setAttribute("fill", color);
+      document.getElementById("fillMale").style.opacity = 0.12;
+      document.getElementById("fillFemale").style.opacity = 0.12;
+      document.getElementById("aura").style.background =
+        `radial-gradient(circle, ${color} 0%, transparent 70%)`;
     }
 
     async function loadLatest() {
@@ -237,21 +256,17 @@
         }
 
         const score = computeScore(r);
-        const { edgeCss, midCss, label } = scoreToColors(score);
-
-        document.getElementById("gemEdge").setAttribute("stop-color", edgeCss);
-        document.getElementById("gemMid").setAttribute("stop-color", midCss);
-        document.getElementById("aura").style.background =
-          `radial-gradient(circle, ${midCss} 0%, ${edgeCss} 55%, transparent 75%)`;
-
-        createSparks(midCss);
+        const { css, label } = scoreToColor(score);
+        setColor(css);
 
         const labelEl = document.getElementById("status-label");
         labelEl.innerText = label;
-        labelEl.style.color = midCss;
+        labelEl.style.color = css;
       }
     }
 
+    createParticles("particlesMale");
+    createParticles("particlesFemale");
     loadLatest();
     setInterval(loadLatest, 3000);
   </script>
