@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -70,11 +71,10 @@
     }
 
     .silhouette-outline { fill: none; stroke-width: 2; opacity: 0.8; }
-
     #body-male, #body-female { display: none; }
 
     .ranges {
-      margin: 40px auto 0;
+      margin: 30px auto 0;
       max-width: 340px;
       font-size: 14px;
       color: #94a3b8;
@@ -83,6 +83,38 @@
       line-height: 1.8;
     }
     .ranges b { color: #cbd5e1; }
+
+    /* Voice assistant button */
+    #mic-btn {
+      margin-top: 30px;
+      background: #111827;
+      border: 2px solid #22d3ee;
+      color: #22d3ee;
+      font-size: 16px;
+      padding: 14px 26px;
+      border-radius: 40px;
+      cursor: pointer;
+      transition: all 0.25s;
+    }
+    #mic-btn:hover { background: #22d3ee; color: #000; }
+    #mic-btn.listening {
+      background: #ef4444;
+      border-color: #ef4444;
+      color: white;
+      animation: micPulse 1s infinite;
+    }
+    @keyframes micPulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.5); }
+      50%      { box-shadow: 0 0 0 14px rgba(239,68,68,0); }
+    }
+
+    #assistant-reply {
+      max-width: 420px;
+      margin: 18px auto 0;
+      font-size: 16px;
+      color: #cbd5e1;
+      min-height: 24px;
+    }
   </style>
 </head>
 <body>
@@ -96,7 +128,6 @@
 
     <svg id="figureSvg" viewBox="0 0 100 190" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <!-- Male silhouette stencil -->
         <clipPath id="clip-male">
           <circle cx="50" cy="22" r="15" />
           <rect x="38" y="40" width="24" height="55" rx="10" />
@@ -105,8 +136,6 @@
           <rect x="32" y="95" width="13" height="62" rx="6" />
           <rect x="55" y="95" width="13" height="62" rx="6" />
         </clipPath>
-
-        <!-- Female silhouette stencil -->
         <clipPath id="clip-female">
           <circle cx="50" cy="22" r="15" />
           <rect x="40" y="40" width="20" height="25" rx="8" />
@@ -118,15 +147,9 @@
         </clipPath>
       </defs>
 
-      <!-- MALE figure -->
       <g id="body-male">
-        <!-- Faint base fill so the shape reads even without particles -->
-        <g clip-path="url(#clip-male)">
-          <rect x="0" y="0" width="100" height="190" id="fillMale" fill="#0f2418" />
-        </g>
-        <!-- Particle field, clipped to the silhouette -->
+        <g clip-path="url(#clip-male)"><rect x="0" y="0" width="100" height="190" id="fillMale" fill="#0f2418" /></g>
         <g clip-path="url(#clip-male)" id="particlesMale"></g>
-        <!-- Crisp outline on top for definition -->
         <g class="silhouette-outline" id="outlineMale">
           <circle cx="50" cy="22" r="15" />
           <rect x="38" y="40" width="24" height="55" rx="10" />
@@ -137,11 +160,8 @@
         </g>
       </g>
 
-      <!-- FEMALE figure -->
       <g id="body-female">
-        <g clip-path="url(#clip-female)">
-          <rect x="0" y="0" width="100" height="190" id="fillFemale" fill="#0f2418" />
-        </g>
+        <g clip-path="url(#clip-female)"><rect x="0" y="0" width="100" height="190" id="fillFemale" fill="#0f2418" /></g>
         <g clip-path="url(#clip-female)" id="particlesFemale"></g>
         <g class="silhouette-outline" id="outlineFemale">
           <circle cx="50" cy="22" r="15" />
@@ -158,6 +178,9 @@
 
   <div id="status-label">NORMAL</div>
   <div id="vitals">Waiting for data...</div>
+
+  <button id="mic-btn">🎤 Ask VitalMesh</button>
+  <div id="assistant-reply"></div>
 
   <div class="ranges">
     <div><b>Normal ranges</b></div>
@@ -202,7 +225,6 @@
       return Math.min(Math.round((worstDev / 3) * 100), 100);
     }
 
-    // Fill each silhouette's particle group with glowing dots, once
     function createParticles(containerId, count = 35) {
       const ns = "http://www.w3.org/2000/svg";
       const group = document.getElementById(containerId);
@@ -234,6 +256,10 @@
         `radial-gradient(circle, ${color} 0%, transparent 70%)`;
     }
 
+    // Keep the latest reading available for the voice assistant to use
+    let latestReading = null;
+    let latestStatus = { css: "rgb(0,255,127)", label: "NORMAL" };
+
     async function loadLatest() {
       const { data } = await client
         .from("readings")
@@ -243,6 +269,8 @@
 
       if (data && data.length > 0) {
         const r = data[0];
+        latestReading = r;
+
         document.getElementById("patient-id").innerText = "Patient: " + (r.patient_id || "--");
         document.getElementById("vitals").innerText =
           `HR: ${r.hr} bpm | SpO2: ${r.spo2}% | Temp: ${r.temp}°C`;
@@ -257,6 +285,7 @@
 
         const score = computeScore(r);
         const { css, label } = scoreToColor(score);
+        latestStatus = { css, label };
         setColor(css);
 
         const labelEl = document.getElementById("status-label");
@@ -269,6 +298,81 @@
     createParticles("particlesFemale");
     loadLatest();
     setInterval(loadLatest, 3000);
+
+    /* ---------------- VOICE ASSISTANT ---------------- */
+
+    // Builds a spoken-style answer purely from the current data - no external AI call needed
+    function buildSpokenAnswer(question) {
+      if (!latestReading) {
+        return "I don't have any readings yet. Please add a test reading first.";
+      }
+      const r = latestReading;
+      const label = latestStatus.label.toLowerCase();
+      const q = question.toLowerCase();
+
+      let answer = `${r.patient_id || "The patient"} is currently ${label}. `;
+      answer += `Heart rate is ${r.hr} beats per minute, oxygen level is ${r.spo2} percent, `;
+      answer += `and temperature is ${r.temp} degrees Celsius. `;
+
+      if (label === "abnormal") {
+        answer += "One or more vitals are outside the safe range. I'd recommend checking on the patient now.";
+      } else if (label === "caution") {
+        answer += "Vitals are drifting slightly from normal. Worth keeping an eye on.";
+      } else {
+        answer += "Everything looks stable right now.";
+      }
+
+      return answer;
+    }
+
+    function speak(text) {
+      window.speechSynthesis.cancel(); // stop any ongoing speech first
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 1;
+      utterance.pitch = 1;
+      window.speechSynthesis.speak(utterance);
+    }
+
+    const micBtn = document.getElementById("mic-btn");
+    const replyBox = document.getElementById("assistant-reply");
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      micBtn.innerText = "🎤 Voice not supported in this browser";
+      micBtn.disabled = true;
+    } else {
+      const recognition = new SpeechRecognition();
+      recognition.lang = "en-US";
+      recognition.continuous = false;
+      recognition.interimResults = false;
+
+      micBtn.addEventListener("click", () => {
+        micBtn.classList.add("listening");
+        micBtn.innerText = "🎤 Listening...";
+        replyBox.innerText = "";
+        recognition.start();
+      });
+
+      recognition.onresult = (event) => {
+        const question = event.results[0][0].transcript;
+        replyBox.innerText = `You asked: "${question}"`;
+        const answer = buildSpokenAnswer(question);
+        setTimeout(() => {
+          replyBox.innerText += `\n\n${answer}`;
+          speak(answer);
+        }, 300);
+      };
+
+      recognition.onerror = () => {
+        replyBox.innerText = "Sorry, I didn't catch that. Try again.";
+      };
+
+      recognition.onend = () => {
+        micBtn.classList.remove("listening");
+        micBtn.innerText = "🎤 Ask VitalMesh";
+      };
+    }
   </script>
 </body>
 </html>
